@@ -8,5 +8,11 @@ def index(request):
 
 def login(request):
     return render(request,"login.html")
-def user_register(request):
-    return render (request,"user_register.html")
+
+def register(request):
+    return render (request,"register.html")
+
+def user_profile(request):
+    return render (request,"profile.html")
+
+
