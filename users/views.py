@@ -4,7 +4,7 @@ import users.forms as forms
 from users.models import User, Profile
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 def index(request):
@@ -32,7 +32,7 @@ def user_login(request):
             return redirect("login")
     return render(request, "login.html")
 
-def user_register(request):
+def register(request):
     register_form = forms.RegisterForm()
     context = {"form": register_form}
     if request.method == "POST":
@@ -64,4 +64,10 @@ def user_register(request):
     return render(request, "register.html", context)
 
 def user_profile(request):
+    Profile = Profile.objects.get(user_id=request.user.pk)
+    context ={"profile":profile}
     return render(request, "profile.html")
+
+def user_logout(logout):
+    logout(request)
+    return redirect("login")
