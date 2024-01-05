@@ -6,12 +6,31 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from products.models import Products
+from django.core.paginator import Paginator
+from django.db.models import Q
+from users.helper import save_image_file_get_url
+
 # Create your views here.
 
+AVATAR_URL = "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
+
+
 def index(request):
+    search = request.GET.get("q")
+    sort = request.GET.get("sort")
     all_products = Products.objects.all()
-    product_data ={"products": all_products}
-    return render(request, "index.html",product_data)
+    if search:
+        all_products = all_products.filter(Q(title__icontains=search)
+                                           | Q(specification__icontains=search))
+    if sort:
+        all_products = all_products.order_by(sort)
+    page_number = request.GET.get("page", 1)
+    pagination = Paginator(all_products, 4)
+    pagination_with_data = pagination.get_page(page_number)
+    total_pages = list(pagination_with_data.paginator.page_range)
+    product_data = {"pagination_with_data": pagination_with_data,
+                    "total_pages": total_pages}
+    return render(request, "index.html", product_data)
 
 
 def user_login(request):
@@ -28,7 +47,10 @@ def user_login(request):
         valid_user = authenticate(username=username,
                                   password=password)
         if valid_user:
+            messages.info(request, "You are logged in")
             login(request, valid_user)
+            profile_obj = Profile.objects.get(user_id=request.user.pk)
+            request.session["profile_pic"] = profile_obj.profile_picture or AVATAR_URL
             return redirect("profile")
         else:
             error_message = "Invalid email or password"
@@ -36,7 +58,8 @@ def user_login(request):
             return redirect("login")
     return render(request, "login.html")
 
-def register(request):
+
+def user_register(request):
     register_form = forms.RegisterForm()
     context = {"form": register_form}
     if request.method == "POST":
@@ -52,13 +75,15 @@ def register(request):
             error_message = "Passwords does not match!"
             messages.error(request, error_message)
             return redirect("register")
+
         check_user = User.objects.filter(email=email).exists()
         if check_user is True:
             error_message = "Email is already taken!"
             messages.error(request, error_message)
             return redirect("register")
+
         # Create user
-        user = User.objects.create(first_name=first_name, last_name=last_name, 
+        user = User.objects.create(first_name=first_name, last_name=last_name,
                                    email=email, username=email)
         user.set_password(password)  # use this to hash/encrypt the password
         user.save()
@@ -67,11 +92,43 @@ def register(request):
         return redirect("login")
     return render(request, "register.html", context)
 
-def user_profile(request):
-    Profile = Profile.objects.get(user_id=request.user.pk)
-    context ={"profile":profile}
-    return render(request, "profile.html")
 
-def user_logout(logout):
+@login_required
+def user_profile(request):
+    profile = Profile.objects.get(user_id=request.user.pk)
+    if profile.profile_picture is None:
+        profile.profile_picture = AVATAR_URL
+    context = {"profile": profile}
+    return render(request, "profile.html", context)
+
+
+@login_required
+def update_profile(request):
+    profile_obj = Profile.objects.get(user_id=request.user.pk)
+    if request.method == "POST":
+        address = request.POST.get("address")
+        contact = request.POST.get("phone")
+        profile_pic = request.FILES.get("profile_pic")
+        if address and profile_obj.address != address:
+            profile_obj.address = address
+        if contact and profile_obj.contact != contact:
+            profile_obj.contact = contact
+        if profile_pic:
+            url = save_image_file_get_url(request, profile_pic)
+            print("URL: ", url)
+            profile_obj.profile_picture = url
+            request.session["profile_pic"] = url
+        profile_obj.save()
+        return redirect("profile")
+
+
+def user_logout(request):
     logout(request)
     return redirect("login")
+
+
+def new_arrivals(request):
+    # shop top 10 latest products
+    latest_products = Products.objects.all().order_by("-created_at")[:10]
+    product_data = {"latest_products": latest_products}
+    return render(request, "new-arrival.html", product_data)

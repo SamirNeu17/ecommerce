@@ -12,37 +12,40 @@
             <h4 class="card-title mb-4">Your shopping cart</h4>
               {% if has_cart %}
               {% for item in carts %}
-                  <form action="{% url 'add_to_cart' product_id=item.product.pk %}" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
                     <div class="row gy-3 mb-4">
                       <div class="col-lg-5">
                         <div class="me-lg-5">
                           <div class="d-flex">
-                            <img src="{{ item.product.image }}" class="border rounded me-3" style="width: 96px; height: 96px;" />
+                            <img src="https://bootstrap-ecommerce.com/bootstrap5-ecommerce/images/items/11.webp" class="border rounded me-3" style="width: 96px; height: 96px;" />
                             <div class="">
-                              <a href="{% url 'product_detail' product_id=item.product.pk %}" class="nav-link">{{ item.product.title }}</a>
+                              <a href="#" class="nav-link">Winter jacket for men and lady</a>
+                              <p class="text-muted">Yellow, Jeans</p>
                             </div>
                           </div>
                         </div>
                       </div>
                       <div class="col-lg-2 col-sm-6 col-6 d-flex flex-row flex-lg-column flex-xl-row text-nowrap">
                         <div class="">
-                          <input type="number" name="quantity" min="1" value="{{ item.cart_quantity }}" style="width: 60px">
+                          <select style="width: 100px;" class="form-select me-4">
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                          </select>
                         </div>
-                        <div class="px-3">
-                          <text class="h6">Rs {{ item.cart_total }}</text> <br />
-                          <small class="text-muted text-nowrap"> Rs {{ item.product.price }} / per item </small>
+                        <div class="">
+                          <text class="h6">$1156.00</text> <br />
+                          <small class="text-muted text-nowrap"> $460.00 / per item </small>
                         </div>
                       </div>
                       <div class="col-lg col-sm-6 d-flex justify-content-sm-center justify-content-md-start justify-content-lg-center justify-content-xl-end mb-2">
                         <div class="float-md-end">
-                            <button type="submit" class="btn btn-light border px-2 icon-hover-primary" > Update</button>
-                          <a href="{% url 'remove_cart_item' cart_id=item.pk %}" class="btn btn-light border text-danger icon-hover-danger"> Remove</a>
+                          <a href="#!" class="btn btn-light border px-2 icon-hover-primary"><i class="fas fa-heart fa-lg px-1 text-secondary"></i></a>
+                          <a href="#" class="btn btn-light border text-danger icon-hover-danger"> Remove</a>
                         </div>
                       </div>
                     </div>
-                  </form>
-              {% endfor %}
+                      {% endfor %}
           {% else %}
           <h1>No items in carts</h1>
           {% endif %}
@@ -58,11 +61,11 @@
             <hr />
             <div class="d-flex justify-content-between">
               <p class="mb-2">Total price:</p>
-              <p class="mb-2 fw-bold">Rs {{ cart_total }}</p>
+              <p class="mb-2 fw-bold">$283.00</p>
             </div>
 
             <div class="mt-3">
-              <a href="{% url 'checkout' %}" class="btn btn-success w-100 shadow-0 mb-2"> Make Purchase </a>
+              <a href="#" class="btn btn-success w-100 shadow-0 mb-2"> Make Purchase </a>
               <a href="{% url 'index' %}" class="btn btn-light w-100 border mt-2"> Back to shop </a>
             </div>
           </div>
